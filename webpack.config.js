@@ -4,7 +4,8 @@ const webpack = require('webpack')
 const nodeExternals = require('webpack-node-externals')
 
 const projectDir = path.resolve(__dirname)
-const mainAppEntryPoint = path.join(projectDir, 'app', 'appMain.lsc')
+const appDir = path.join(projectDir, 'app')
+const mainAppEntryPoint = path.join(appDir, 'appMain.lsc')
 const ISDEV = process.env.NODE_ENV !== 'production'
 
 console.log('ISDEV: ', ISDEV)
@@ -16,7 +17,7 @@ const webpackOptions = {
   entry: mainAppEntryPoint,
   output: {
     filename: 'appMain-compiled.js',
-    path: projectDir
+    path: appDir
   },
   externals: [nodeExternals()],
   node: {

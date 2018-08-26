@@ -116,7 +116,7 @@ var _pFinally = __webpack_require__(/*! p-finally */ "p-finally");
 
 var _pFinally2 = _interopRequireDefault(_pFinally);
 
-var _youtubeRegex = __webpack_require__(/*! youtube-regex */ "./node_modules/youtube-regex/index.js");
+var _youtubeRegex = __webpack_require__(/*! youtube-regex */ "youtube-regex");
 
 var _youtubeRegex2 = _interopRequireDefault(_youtubeRegex);
 
@@ -160,32 +160,6 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
 }function isValidYoutubeUrl(url) {
   return url.length < 1000 && (0, _youtubeRegex2.default)().test(url);
 }
-
-/***/ }),
-
-/***/ "./node_modules/youtube-regex/index.js":
-/*!*********************************************!*\
-  !*** ./node_modules/youtube-regex/index.js ***!
-  \*********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/**
- * youtube-regex <https://github.com/tunnckoCore/youtube-regex>
- *
- * Copyright (c) 2014 Charlike Mike Reagent, contributors.
- * Released under the MIT license.
- */
-
-
-
-module.exports = function youtubeRegex() {
-  var regex = /(?:youtube\.com\/\S*(?:(?:\/e(?:mbed))?\/|watch\/?\?(?:\S*?&?v\=))|youtu\.be\/)([a-zA-Z0-9_-]{6,11})/g;
-
-  return regex;
-};
-
 
 /***/ }),
 
@@ -241,6 +215,17 @@ module.exports = require("p-finally");
 /***/ (function(module, exports) {
 
 module.exports = require("path");
+
+/***/ }),
+
+/***/ "youtube-regex":
+/*!********************************!*\
+  !*** external "youtube-regex" ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("youtube-regex");
 
 /***/ })
 

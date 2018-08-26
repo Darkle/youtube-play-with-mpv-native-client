@@ -5,9 +5,9 @@
   "main": "",
   "scripts": {
     "ww": "cross-env NODE_ENV=development webpack --watch --max-retries=1 --no-stats",
-    "debug": "cross-env NODE_ENV=development webpack && node --inspect appMain-compiled.js",
+    "debug": "cross-env NODE_ENV=development webpack && node --inspect app/appMain-compiled.js",
     "build": "cross-env NODE_ENV=production webpack && node devTasks/packageApp.js",
-    "start": "cross-env NODE_ENV=production node appMain-compiled.js"
+    "start": "cross-env NODE_ENV=production node app/appMain-compiled.js"
   },
   "dependencies": {
     "chrome-native-messaging": "^0.2.0",
