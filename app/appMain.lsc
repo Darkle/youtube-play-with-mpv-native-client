@@ -1,0 +1,60 @@
+import path from 'path'
+import fs from 'fs'
+
+import mpvAPI from 'node-mpv'
+import nativeMessage from 'chrome-native-messaging'
+import pFinally from 'p-finally'
+import youtubeRegex from 'youtube-regex'
+
+/*****
+* Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
+*/
+
+input = new nativeMessage.Input()
+transform = new nativeMessage.Transform(messageHandler)
+output = new nativeMessage.Output()
+
+process.stdin
+  .pipe(input)
+  .pipe(transform)
+  .pipe(output)
+  .pipe(process.stdout)
+
+messageHandler({url, cookies, mpvOptions}, push, done):void ->
+  if !isValidYoutubeUrl(url): return
+
+  cookiesFilePath = createCookiesFile(cookies)
+  mpv = createNewMpvInstance(mpvOptions, cookiesFilePath)
+
+  mpv.setMultipleProperties({
+    'volume': mpvOptions.volume
+  })
+
+  pFinally(
+    mpv.start()
+      .then(() -> mpv.load(url))
+      .then(() ->
+        if mpvOptions.startingPosition:
+          mpv.goToPosition(mpvOptions.startingPosition)
+      )
+    , done
+  )
+  .catch((error) -> console.log(error))
+
+createNewMpvInstance(mpvOptions, cookiesFilePath) ->
+  new mpvAPI(
+    {'debug': false},
+    [
+      '--cookies',
+      `--cookies-file="${ cookiesFilePath }"`,
+      `--ytdl-raw-options=cookies="${ cookiesFilePath }"`
+    ]
+  )
+
+createCookiesFile(cookies):string ->
+  cookiesFilePath = path.join(process.env.TEMP, 'cookies.txt')
+  fs.writeFileSync(cookiesFilePath, cookies.join('\n'))
+  cookiesFilePath
+
+isValidYoutubeUrl(url:string):boolean ->
+  url.length < 1000 && youtubeRegex().test(url)

@@ -1,0 +1,40 @@
+{
+  "name": "youtube-play-with-mpv-native-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "ww": "cross-env NODE_ENV=development webpack --watch --max-retries=1 --no-stats",
+    "debug": "cross-env NODE_ENV=development webpack && node --inspect appMain-compiled.js",
+    "build": "cross-env NODE_ENV=production webpack && node devTasks/packageApp.js",
+    "start": "cross-env NODE_ENV=production node appMain-compiled.js"
+  },
+  "dependencies": {
+    "chrome-native-messaging": "^0.2.0",
+    "node-mpv": "git+https://github.com/00SteinsGate00/Node-MPV.git#Node-MPV-2",
+    "p-finally": "^1.0.0",
+    "youtube-regex": "^1.0.5"
+  },
+  "devDependencies": {
+    "@oigroup/babel-preset-lightscript": "^3.1.1",
+    "@oigroup/lightscript-eslint": "^3.1.1",
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "cross-env": "^5.2.0",
+    "eslint": "^4.8.0",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-node-externals": "^1.7.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Darkle/youtube-play-with-mpv-native-client.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Darkle/youtube-play-with-mpv-native-client/issues"
+  },
+  "homepage": "https://github.com/Darkle/youtube-play-with-mpv-native-client#readme"
+}
