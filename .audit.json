@@ -1,0 +1,14 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "./.audit.json",
+    "files": [
+        {
+            "date": 1535324662061,
+            "name": "yt-open-in-mpv-native-client-2018-08-27-09.log",
+            "hash": "19d05ec6cefb56b3afde95fdfd0868ce"
+        }
+    ]
+}

@@ -5,6 +5,9 @@ import mpvAPI from 'node-mpv'
 import nativeMessage from 'chrome-native-messaging'
 import pFinally from 'p-finally'
 import youtubeRegex from 'youtube-regex'
+import winston from 'winston'
+import 'winston-daily-rotate-file'
+import getYoutubeId from 'get-youtube-id'
 
 /*****
 * Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
@@ -13,6 +16,19 @@ import youtubeRegex from 'youtube-regex'
 input = new nativeMessage.Input()
 transform = new nativeMessage.Transform(messageHandler)
 output = new nativeMessage.Output()
+fileTransport = new (winston.transports.DailyRotateFile)({
+  filename: 'yt-open-in-mpv-native-client-%DATE%.log',
+  datePattern: 'YYYY-MM-DD-HH',
+  maxSize: '20m',
+  maxFiles: '7d'
+})
+logger = winston.createLogger({
+  level: if ISDEV: 'info' else: 'error',
+  transports: [
+    fileTransport,
+    if ISDEV: new winston.transports.Console({format: winston.format.simple()})
+  ]
+})
 
 process.stdin
   .pipe(input)
@@ -23,8 +39,14 @@ process.stdin
 messageHandler({url, cookies, mpvOptions}, push, done):void ->
   if !isValidYoutubeUrl(url): return
 
+  sort out getting the position if the vid doesnt start at the beginning
+
   cookiesFilePath = createCookiesFile(cookies)
   mpv = createNewMpvInstance(mpvOptions, cookiesFilePath)
+  mpv.on('crashed', () ->
+    logger.error('mpv crashed')
+    done()
+  )
 
   mpv.setMultipleProperties({
     'volume': mpvOptions.volume
@@ -32,15 +54,19 @@ messageHandler({url, cookies, mpvOptions}, push, done):void ->
 
   pFinally(
     mpv.start()
-      .then(() -> mpv.load(url))
+      .then(() -> mpv.load(cleanYoutubeUrl(url)))
       .then(() ->
         if mpvOptions.startingPosition:
-          mpv.goToPosition(mpvOptions.startingPosition)
+          mpv.goToPosition(mpvOptions.startTime)
       )
     , done
   )
-  .catch((error) -> console.log(error))
+  .catch(logger.error)
 
+https://mpv.io/manual/stable/#options-ytdl-format
+https://mpv.io/manual/stable/#options-ontop
+https://mpv.io/manual/stable/#options-autofit - for mpvWindowSize
+https://mpv.io/manual/stable/#options-pause - start in a paused state
 createNewMpvInstance(mpvOptions, cookiesFilePath) ->
   new mpvAPI(
     {'debug': false},
@@ -58,3 +84,15 @@ createCookiesFile(cookies):string ->
 
 isValidYoutubeUrl(url:string):boolean ->
   url.length < 1000 && youtubeRegex().test(url)
+
+/*****
+* I had some issues with mpv where if the youtube url had stuff at the end of it -
+* e.g. https://www.youtube.com/watch?v=WUC863mOtTc&feature=youtu.be&t=2398, then
+* mpv would seem to ignore any command line flags after the url, so gonna clean it.
+*/
+cleanYoutubeUrl(url:string):string ->
+  `https://www.youtube.com/watch?v=${ getYoutubeId(url) }`
+
+
+process.on('unhandledRejection', logger.error)
+process.on('uncaughtException', logger.error)
