@@ -193,6 +193,8 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   if (osc === 'box') return `--script-opts=osc-layout=box,osc-scalewindowed=1.2`;else return `--script-opts=osc-scalewindowed=1.2`;
 }function createCookiesFile(cookies) {
   const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
+  // console.clear()
+  // console.log(cookies)
   _fs2.default.writeFileSync(cookiesFilePath, cookies);
   return cookiesFilePath;
 }function isValidYoutubeUrl(url) {
@@ -224,8 +226,16 @@ process.on('uncaughtException', _logging.logger.error);
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+__webpack_require__(/*! dotenv */ "dotenv").config();
+
+/*****
+* dotenv seems to add extra backslashes to the \t's, so I base64
+* encoded the string in the .env file
+*/
+const cookies = Buffer.from(process.env.DEBUGCOOKIES, 'base64').toString('utf8');
+
 const videoNoTimeStamp = {
-  cookies: "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t1597921282\tSSID\tAhBvxvfcPpnduTjnS\n.youtube.com\tTRUE\t/\tTRUE\t1597921282\tSAPISID\tsf39VViUkvl9VD6Y/AwHkNZywb4BQYD2Oy",
+  cookies,
   mpvOptions: {
     alwaysOnTop: true,
     defaultMpvWindowSize: '640x360',
@@ -238,7 +248,7 @@ const videoNoTimeStamp = {
   url: "https://www.youtube.com/watch?v=E42D2XF2oAs"
 };
 const videoWithTimeStamp = {
-  cookies: "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t1597921282\tSSID\tAhBvxvfcPpnduTjnS\n.youtube.com\tTRUE\t/\tTRUE\t1597921282\tSAPISID\tsf39VViUkvl9VD6Y/AwHkNZywb4BQYD2Oy",
+  cookies,
   mpvOptions: {
     alwaysOnTop: false,
     defaultMpvWindowSize: 'off',
@@ -251,7 +261,7 @@ const videoWithTimeStamp = {
   url: "https://www.youtube.com/watch?v=VFIq94h91sM&t=1h26m15s"
 };
 const videoNeedToSignIn = {
-  cookies: "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t1597921282\tSSID\tAhBvxvfcPpnduTjnS\n.youtube.com\tTRUE\t/\tTRUE\t1597921282\tSAPISID\tsf39VViUkvl9VD6Y/AwHkNZywb4BQYD2Oy",
+  cookies,
   mpvOptions: {
     alwaysOnTop: false,
     defaultMpvWindowSize: 'off',
@@ -473,6 +483,17 @@ let YouTubeURLParser = exports.YouTubeURLParser = class YouTubeURLParser {
 /***/ (function(module, exports) {
 
 module.exports = require("chrome-native-messaging");
+
+/***/ }),
+
+/***/ "dotenv":
+/*!*************************!*\
+  !*** external "dotenv" ***!
+  \*************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = require("dotenv");
 
 /***/ }),
 

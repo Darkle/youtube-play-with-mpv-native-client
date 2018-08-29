@@ -1,0 +1,53 @@
+require('dotenv').config()
+
+/*****
+* dotenv seems to add extra backslashes to the \t's, so I base64
+* encoded the string in the .env file
+*/
+cookies = Buffer.from(process.env.DEBUGCOOKIES, 'base64').toString('utf8')
+
+videoNoTimeStamp = {
+  cookies,
+  mpvOptions: {
+    alwaysOnTop: true,
+    defaultMpvWindowSize: '640x360',
+    dontLetYTpageVideoAutoLoad: false,
+    oscStyle: "bottombar",
+    startMPVpaused: false,
+    videoQuality: "original",
+    volume: 70,
+  }
+  url: "https://www.youtube.com/watch?v=E42D2XF2oAs"
+}
+videoWithTimeStamp = {
+  cookies,
+  mpvOptions: {
+    alwaysOnTop: false,
+    defaultMpvWindowSize: 'off',
+    dontLetYTpageVideoAutoLoad: false,
+    oscStyle: "box",
+    startMPVpaused: true,
+    videoQuality: "original",
+    volume: 70,
+  }
+  url: "https://www.youtube.com/watch?v=VFIq94h91sM&t=1h26m15s"
+}
+videoNeedToSignIn = {
+  cookies,
+  mpvOptions: {
+    alwaysOnTop: false,
+    defaultMpvWindowSize: 'off',
+    dontLetYTpageVideoAutoLoad: false,
+    oscStyle: "box",
+    startMPVpaused: true,
+    videoQuality: "original",
+    volume: 70,
+  }
+  url: "https://www.youtube.com/watch?v=6LZM3_wp2ps"
+}
+
+export {
+  videoNoTimeStamp,
+  videoWithTimeStamp,
+  videoNeedToSignIn
+}
