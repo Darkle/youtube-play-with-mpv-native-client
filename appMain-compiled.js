@@ -193,8 +193,6 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   if (osc === 'box') return `--script-opts=osc-layout=box,osc-scalewindowed=1.2`;else return `--script-opts=osc-scalewindowed=1.2`;
 }function createCookiesFile(cookies) {
   const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
-  // console.clear()
-  // console.log(cookies)
   _fs2.default.writeFileSync(cookiesFilePath, cookies);
   return cookiesFilePath;
 }function isValidYoutubeUrl(url) {

@@ -105,8 +105,6 @@ generateScriptOpts(osc:string):string ->
 
 createCookiesFile(cookies:string):string ->
   cookiesFilePath = path.join(process.cwd(), 'cookies.txt')
-  // console.clear()
-  // console.log(cookies)
   fs.writeFileSync(cookiesFilePath, cookies)
   cookiesFilePath
 
