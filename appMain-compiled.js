@@ -136,7 +136,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 //TODO: remove this
 // messageHandler(videoWithTimeStamp, null, () -> return)
-//TODO: REMOVE THIS AS IT CONTAINS MY YOUTUBE COOKIE
+//TODO: REMOVE THIS and switch to orig if my PR is accepted
 
 //TODO:remove this and its file when done
 
@@ -151,10 +151,10 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   _logging.logger.debug(url);
   _logging.logger.debug(cookies);
   _logging.logger.debug(mpvOptions);
-  const ytParser = new _parsertest.YouTubeURLParser(url);
-  _logging.logger.debug(ytParser.getStartAtSecond());
 
-  if (!isValidYoutubeUrl(url)) return;
+  const ytParser = new _parsertest.YouTubeURLParser(url);
+
+  if (!ytParser.isValid(url)) return;
 
   const cookiesFilePath = createCookiesFile(cookies);
   const mpv = createNewMpvInstance(mpvOptions, cookiesFilePath);
@@ -195,9 +195,6 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
   _fs2.default.writeFileSync(cookiesFilePath, cookies);
   return cookiesFilePath;
-}function isValidYoutubeUrl(url) {
-  const parser = new _parsertest.YouTubeURLParser(url);
-  return url.length < 1000 && parser.isValid();
 } /*****
   * I had some issues with mpv where if the youtube url had stuff at the end of it -
   * e.g. https://www.youtube.com/watch?v=WUC863mOtTc&feature=youtu.be&t=2398, then

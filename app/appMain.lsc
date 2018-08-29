@@ -9,7 +9,7 @@ import {YouTubeURLParser } from './parsertest.lsc' //TODO:remove this and its fi
 
 import { logger } from './logging.lsc'
 
-import { videoNoTimeStamp, videoWithTimeStamp } from './debugMockData.lsc' //TODO: REMOVE THIS AS IT CONTAINS MY YOUTUBE COOKIE
+import { videoNoTimeStamp, videoWithTimeStamp } from './debugMockData.lsc' //TODO: REMOVE THIS and switch to orig if my PR is accepted
 
 type MpvOptions = {
   volume: number,
@@ -44,10 +44,10 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
   logger.debug(url)
   logger.debug(cookies)
   logger.debug(mpvOptions)
-  ytParser = new YouTubeURLParser(url)
-  logger.debug(ytParser.getStartAtSecond())
 
-  if !isValidYoutubeUrl(url): return
+  ytParser = new YouTubeURLParser(url)
+
+  if !ytParser.isValid(url): return
 
   cookiesFilePath = createCookiesFile(cookies)
   mpv = createNewMpvInstance(mpvOptions, cookiesFilePath)
@@ -107,10 +107,6 @@ createCookiesFile(cookies:string):string ->
   cookiesFilePath = path.join(process.cwd(), 'cookies.txt')
   fs.writeFileSync(cookiesFilePath, cookies)
   cookiesFilePath
-
-isValidYoutubeUrl(url:string):boolean ->
-  parser = new YouTubeURLParser(url)
-  url.length < 1000 && parser.isValid()
 
 /*****
 * I had some issues with mpv where if the youtube url had stuff at the end of it -
