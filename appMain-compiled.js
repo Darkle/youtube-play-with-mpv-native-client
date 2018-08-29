@@ -175,9 +175,7 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
       return mpv.goToPosition(videoStartPosition);
     }
   }).then(function () {
-    if (mpvOptions.startMPVpaused) {
-      return mpv.pause();
-    }
+    if (mpvOptions.startMPVpaused) return mpv.pause();
   }), done).catch(_logging.logger.error);
 }function createNewMpvInstance(mpvOptions, cookiesFilePath) {
   return new _nodeMpv2.default({

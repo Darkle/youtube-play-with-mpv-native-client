@@ -68,8 +68,7 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
           mpv.goToPosition(videoStartPosition)
       )
       .then(() ->
-        if mpvOptions.startMPVpaused:
-          mpv.pause()
+        if mpvOptions.startMPVpaused: mpv.pause()
       )
     , done
   )
