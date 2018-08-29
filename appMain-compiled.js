@@ -158,6 +158,7 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
 
   const cookiesFilePath = createCookiesFile(cookies);
   const mpv = createNewMpvInstance(mpvOptions, cookiesFilePath);
+
   mpv.on('crashed', function () {
     _logging.logger.error('mpv crashed');
     return done();
@@ -169,7 +170,8 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
     return mpv.load(cleanYoutubeUrl(url));
   }).then(function () {
     const videoStartPosition = ytParser.getStartAtSecond();
-    if (videoStartPosition > 15) {
+    // If it's 10 seconds or less then it's not worth skipping ahead
+    if (videoStartPosition > 10) {
       return mpv.goToPosition(videoStartPosition);
     }
   }).then(function () {
@@ -178,7 +180,6 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
     }
   }), done).catch(_logging.logger.error);
 }function createNewMpvInstance(mpvOptions, cookiesFilePath) {
-  //TODO:if startMPVpaused: --pause
   return new _nodeMpv2.default({
     "binary": _path2.default.join(process.cwd(), 'mpv.exe')
   }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);

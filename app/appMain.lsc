@@ -51,6 +51,7 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
 
   cookiesFilePath = createCookiesFile(cookies)
   mpv = createNewMpvInstance(mpvOptions, cookiesFilePath)
+
   mpv.on('crashed', () ->
     logger.error('mpv crashed')
     done()
@@ -62,7 +63,8 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
       .then(() -> mpv.load(cleanYoutubeUrl(url)))
       .then(() ->
         videoStartPosition = ytParser.getStartAtSecond()
-        if videoStartPosition > 15:
+        // If it's 10 seconds or less then it's not worth skipping ahead
+        if videoStartPosition > 10:
           mpv.goToPosition(videoStartPosition)
       )
       .then(() ->
@@ -74,7 +76,6 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
   .catch(logger.error)
 
 createNewMpvInstance(mpvOptions:MpvOptions, cookiesFilePath:string) ->
-  //TODO:if startMPVpaused: --pause
   new mpvAPI(
     {
       "binary": path.join(process.cwd(), 'mpv.exe'),
