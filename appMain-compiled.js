@@ -181,13 +181,12 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
 }function createNewMpvInstance(mpvOptions, cookiesFilePath) {
   return new _nodeMpv2.default({ 'binary': mpvPath }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
 }function generateMPVwindowSizeOpts(defaultMpvWindowSize) {
-  if (defaultMpvWindowSize === 'off') return ``;
-  return `--autofit=${defaultMpvWindowSize}`;
+  return defaultMpvWindowSize === 'off' ? `` : `--autofit=${defaultMpvWindowSize}`;
 }function generateYTvideoQualityOpts(videoQuality) {
-  if (videoQuality === 'original') return ``;
-  return `--ytdl-format=${videoQuality}`;
+  return videoQuality === 'original' ? `` : `--ytdl-format=${videoQuality}`;
 }function generateScriptOpts(osc) {
-  if (osc === 'box') return `--script-opts=osc-layout=box,osc-scalewindowed=1.2`;else return `--script-opts=osc-scalewindowed=1.2`;
+  if (osc === 'box') return `--script-opts=osc-layout=box,osc-scalewindowed=1.2`;
+  return `--script-opts=osc-scalewindowed=1.2`;
 }function createCookiesFile(cookies) {
   const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
   _fs2.default.writeFileSync(cookiesFilePath, cookies);

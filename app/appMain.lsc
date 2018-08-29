@@ -90,16 +90,14 @@ createNewMpvInstance(mpvOptions:MpvOptions, cookiesFilePath:string) ->
   )
 
 generateMPVwindowSizeOpts(defaultMpvWindowSize:string):string ->
-  if defaultMpvWindowSize === 'off': return ``
-  `--autofit=${ defaultMpvWindowSize }`
+  defaultMpvWindowSize === 'off' ? `` : `--autofit=${ defaultMpvWindowSize }`
 
 generateYTvideoQualityOpts(videoQuality:string):string ->
-  if videoQuality === 'original': return ``
-  `--ytdl-format=${ videoQuality }`
+  videoQuality === 'original' ? `` : `--ytdl-format=${ videoQuality }`
 
 generateScriptOpts(osc:string):string ->
-  if osc === 'box': `--script-opts=osc-layout=box,osc-scalewindowed=1.2`
-  else: `--script-opts=osc-scalewindowed=1.2`
+  if osc === 'box': return `--script-opts=osc-layout=box,osc-scalewindowed=1.2`
+  `--script-opts=osc-scalewindowed=1.2`
 
 createCookiesFile(cookies:string):string ->
   cookiesFilePath = path.join(process.cwd(), 'cookies.txt')
