@@ -124,6 +124,11 @@ var _debugMockData = __webpack_require__(/*! ./debugMockData.lsc */ "./app/debug
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+//TODO: REMOVE THIS and switch to orig if my PR is accepted
+
+//TODO:remove this and its file when done
+
+const mpvPath = _path2.default.join(process.cwd(), 'mpv.exe');
 // input = new nativeMessage.Input()
 // transform = new nativeMessage.Transform(messageHandler)
 // output = new nativeMessage.Output()
@@ -136,15 +141,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 //TODO: remove this
 // messageHandler(videoWithTimeStamp, null, () -> return)
-//TODO: REMOVE THIS and switch to orig if my PR is accepted
 
-//TODO:remove this and its file when done
-
+// import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
 messageHandler(_debugMockData.videoNoTimeStamp, null, function () {
   return;
 });
-// import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
-
 
 function messageHandler({ url, cookies, mpvOptions }, push, done) {
   _logging.logger.debug('messageHandler ');
@@ -178,9 +179,7 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
     if (mpvOptions.startMPVpaused) return mpv.pause();
   }), done).catch(_logging.logger.error);
 }function createNewMpvInstance(mpvOptions, cookiesFilePath) {
-  return new _nodeMpv2.default({
-    "binary": _path2.default.join(process.cwd(), 'mpv.exe')
-  }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
+  return new _nodeMpv2.default({ 'binary': mpvPath }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
 }function generateMPVwindowSizeOpts(defaultMpvWindowSize) {
   if (defaultMpvWindowSize === 'off') return ``;
   return `--autofit=${defaultMpvWindowSize}`;

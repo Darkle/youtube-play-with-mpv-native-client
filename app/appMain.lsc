@@ -25,6 +25,7 @@ type NativeMessage = {
   cookies: string,
   mpvOptions: MpvOptions
 };
+mpvPath = path.join(process.cwd(), 'mpv.exe')
 // input = new nativeMessage.Input()
 // transform = new nativeMessage.Transform(messageHandler)
 // output = new nativeMessage.Output()
@@ -76,9 +77,7 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
 
 createNewMpvInstance(mpvOptions:MpvOptions, cookiesFilePath:string) ->
   new mpvAPI(
-    {
-      "binary": path.join(process.cwd(), 'mpv.exe'),
-    },
+    {'binary': mpvPath},
     [
       '--cookies',
       `--cookies-file="${ cookiesFilePath }"`,
