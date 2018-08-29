@@ -120,35 +120,28 @@ var _parsertest = __webpack_require__(/*! ./parsertest.lsc */ "./app/parsertest.
 
 var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/logging.lsc");
 
-var _debugMockData = __webpack_require__(/*! ./debugMockData.lsc */ "./app/debugMockData.lsc");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//TODO: REMOVE THIS and switch to orig if my PR is accepted
+// import { videoNoTimeStamp, videoWithTimeStamp, videoNeedToSignIn } from './debugMockData.lsc' //TODO: REMOVE THIS and switch to orig if my PR is accepted
 
-//TODO:remove this and its file when done
-
-const mpvPath = _path2.default.join(process.cwd(), 'mpv.exe');
 // import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
+const mpvPath = _path2.default.join(process.cwd(), 'mpv.exe'); //TODO:remove this and its file when done
 
 const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
 
-// input = new nativeMessage.Input()
-// transform = new nativeMessage.Transform(messageHandler)
-// output = new nativeMessage.Output()
+const input = new _chromeNativeMessaging2.default.Input();
+const transform = new _chromeNativeMessaging2.default.Transform(messageHandler);
+const output = new _chromeNativeMessaging2.default.Output();
 
-// process.stdin
-//   .pipe(input)
-//   .pipe(transform)
-//   .pipe(output)
-//   .pipe(process.stdout)
+process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout);
 
 //TODO: remove this
 // messageHandler(videoWithTimeStamp, null, () -> return)
-messageHandler(_debugMockData.videoNoTimeStamp, null, function () {
-  return;
-});
-
+// messageHandler(videoNoTimeStamp, null, () -> return)
+// messageHandler(videoNeedToSignIn, null, () -> return)
+/*****
+* Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
+*/
 function messageHandler({ url, cookies, mpvOptions }, push, done) {
   _logging.logger.debug('messageHandler ');
   _logging.logger.debug(url);
@@ -165,7 +158,8 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   mpv.on('crashed', function () {
     _logging.logger.error('mpv crashed');
     return done();
-  });
+  } // process.exit(0)
+  );
 
   (0, _pFinally2.default)(mpv.start().then(function () {
     return mpv.volume(mpvOptions.volume);
@@ -179,7 +173,31 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
     }
   }).then(function () {
     if (mpvOptions.startMPVpaused) return mpv.pause();
-  }), done).catch(_logging.logger.error);
+  }), function () {
+    return done();
+  } // process.exit(0)
+  ).catch(_logging.logger.error);
+
+  player.socket.on('message', data => {
+    if (data.event) {
+      switch (data.event) {
+        case 'file-loaded':
+          const loadedBeforeEnded = true;
+
+          done();
+          process.exit(0);
+
+          break;
+        case 'end-file':
+          if (!loadedBeforeEnded) {
+            done();
+            process.exit(1);
+          }
+          process.exit(0);
+          break;
+      }
+    }
+  });
 }function createNewMpvInstance(mpvOptions) {
   return new _nodeMpv2.default({ 'binary': mpvPath }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
 }function generateMPVwindowSizeOpts(defaultMpvWindowSize) {
@@ -201,73 +219,6 @@ function cleanYoutubeUrl(url) {
   return `https://www.youtube.com/watch?v=${parser.getId()}`;
 }process.on('unhandledRejection', _logging.logger.error);
 process.on('uncaughtException', _logging.logger.error);
-
-/***/ }),
-
-/***/ "./app/debugMockData.lsc":
-/*!*******************************!*\
-  !*** ./app/debugMockData.lsc ***!
-  \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-__webpack_require__(/*! dotenv */ "dotenv").config();
-
-/*****
-* dotenv seems to add extra backslashes to the \t's, so I base64
-* encoded the string in the .env file
-*/
-const cookies = Buffer.from(process.env.DEBUGCOOKIES, 'base64').toString('utf8');
-
-const videoNoTimeStamp = {
-  cookies,
-  mpvOptions: {
-    alwaysOnTop: true,
-    defaultMpvWindowSize: '640x360',
-    dontLetYTpageVideoAutoLoad: false,
-    oscStyle: "bottombar",
-    startMPVpaused: false,
-    videoQuality: "original",
-    volume: 70
-  },
-  url: "https://www.youtube.com/watch?v=E42D2XF2oAs"
-};
-const videoWithTimeStamp = {
-  cookies,
-  mpvOptions: {
-    alwaysOnTop: false,
-    defaultMpvWindowSize: 'off',
-    dontLetYTpageVideoAutoLoad: false,
-    oscStyle: "box",
-    startMPVpaused: true,
-    videoQuality: "original",
-    volume: 70
-  },
-  url: "https://www.youtube.com/watch?v=VFIq94h91sM&t=1h26m15s"
-};
-const videoNeedToSignIn = {
-  cookies,
-  mpvOptions: {
-    alwaysOnTop: false,
-    defaultMpvWindowSize: 'off',
-    dontLetYTpageVideoAutoLoad: false,
-    oscStyle: "box",
-    startMPVpaused: true,
-    videoQuality: "original",
-    volume: 70
-  },
-  url: "https://www.youtube.com/watch?v=6LZM3_wp2ps"
-};
-
-exports.videoNoTimeStamp = videoNoTimeStamp;
-exports.videoWithTimeStamp = videoWithTimeStamp;
-exports.videoNeedToSignIn = videoNeedToSignIn;
 
 /***/ }),
 
@@ -301,10 +252,14 @@ const fileTransport = new _winston2.default.transports.DailyRotateFile({
   maxFiles: '7d'
 });
 
+const transports = [fileTransport];
+
+if (true) transports.push(new _winston2.default.transports.Console());
+
 const logger = _winston2.default.createLogger({
-  level:  true ? 'debug' : undefined,
+  level: 'debug',
   format:  true ? _winston2.default.format.prettyPrint() : undefined,
-  transports: [fileTransport,  true ? new _winston2.default.transports.Console() : undefined]
+  transports
 });
 
 exports.logger = logger;
@@ -474,17 +429,6 @@ let YouTubeURLParser = exports.YouTubeURLParser = class YouTubeURLParser {
 /***/ (function(module, exports) {
 
 module.exports = require("chrome-native-messaging");
-
-/***/ }),
-
-/***/ "dotenv":
-/*!*************************!*\
-  !*** external "dotenv" ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("dotenv");
 
 /***/ }),
 

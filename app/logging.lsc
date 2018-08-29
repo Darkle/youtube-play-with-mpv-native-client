@@ -8,13 +8,16 @@ fileTransport = new (winston.transports.DailyRotateFile)({
   maxFiles: '7d'
 })
 
+transports = [
+  fileTransport,
+]
+
+if ISDEV: transports.push(new winston.transports.Console())
+
 logger = winston.createLogger({
-  level: if ISDEV: 'debug' else: 'error',
+  level: 'debug',
   format: if ISDEV: winston.format.prettyPrint() else: winston.format.json()
-  transports: [
-    fileTransport,
-    if ISDEV: new winston.transports.Console()
-  ]
+  transports
 })
 
 export {

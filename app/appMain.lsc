@@ -9,7 +9,7 @@ import {YouTubeURLParser } from './parsertest.lsc' //TODO:remove this and its fi
 
 import { logger } from './logging.lsc'
 
-import { videoNoTimeStamp, videoWithTimeStamp } from './debugMockData.lsc' //TODO: REMOVE THIS and switch to orig if my PR is accepted
+// import { videoNoTimeStamp, videoWithTimeStamp, videoNeedToSignIn } from './debugMockData.lsc' //TODO: REMOVE THIS and switch to orig if my PR is accepted
 
 type MpvOptions = {
   volume: number,
@@ -28,20 +28,23 @@ type NativeMessage = {
 mpvPath = path.join(process.cwd(), 'mpv.exe')
 cookiesFilePath = path.join(process.cwd(), 'cookies.txt')
 
-// input = new nativeMessage.Input()
-// transform = new nativeMessage.Transform(messageHandler)
-// output = new nativeMessage.Output()
+input = new nativeMessage.Input()
+transform = new nativeMessage.Transform(messageHandler)
+output = new nativeMessage.Output()
 
-// process.stdin
-//   .pipe(input)
-//   .pipe(transform)
-//   .pipe(output)
-//   .pipe(process.stdout)
+process.stdin
+  .pipe(input)
+  .pipe(transform)
+  .pipe(output)
+  .pipe(process.stdout)
 
 //TODO: remove this
 // messageHandler(videoWithTimeStamp, null, () -> return)
-messageHandler(videoNoTimeStamp, null, () -> return)
-
+// messageHandler(videoNoTimeStamp, null, () -> return)
+// messageHandler(videoNeedToSignIn, null, () -> return)
+/*****
+* Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
+*/
 messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
   logger.debug('messageHandler ')
   logger.debug(url)
@@ -58,6 +61,7 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
   mpv.on('crashed', () ->
     logger.error('mpv crashed')
     done()
+    // process.exit(0)
   )
 
   pFinally(
@@ -73,9 +77,34 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
       .then(() ->
         if mpvOptions.startMPVpaused: mpv.pause()
       )
-    , done
+    ,
+    () ->
+      done()
+      // process.exit(0)
   )
   .catch(logger.error)
+
+  player.socket.on('message', data => {
+    if (data.event) {
+      switch (data.event) {
+        case 'file-loaded':
+          loadedBeforeEnded = true
+
+          done()
+          process.exit(0)
+
+          break
+        case 'end-file':
+          if (!loadedBeforeEnded) {
+            done()
+            process.exit(1)
+          }
+          process.exit(0)
+          break
+      }
+    }
+  })
+
 
 createNewMpvInstance(mpvOptions:MpvOptions) ->
   new mpvAPI(

@@ -7,7 +7,8 @@
     "ww": "cross-env NODE_ENV=development webpack --watch --max-retries=1 --no-stats",
     "devWatch": "nodemon appMain-compiled.js",
     "debug": "cross-env NODE_ENV=development webpack && node --inspect appMain-compiled.js",
-    "build": "cross-env NODE_ENV=production webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win appMain-compiled.js -o build/openInMpv.exe",
+    "buildDev": "cross-env NODE_ENV=development webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win appMain-compiled.js -o build/openInMpv.exe",
+    "buildProd": "cross-env NODE_ENV=production webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win appMain-compiled.js -o build/openInMpv.exe",
     "start": "cross-env NODE_ENV=production node appMain-compiled.js"
   },
   "dependencies": {
