@@ -1,0 +1,22 @@
+import winston from 'winston'
+import 'winston-daily-rotate-file'
+
+fileTransport = new (winston.transports.DailyRotateFile)({
+  filename: 'yt-open-in-mpv-native-client-%DATE%.log',
+  datePattern: 'YYYY-MM-DD-HH',
+  maxSize: '20m',
+  maxFiles: '7d'
+})
+
+logger = winston.createLogger({
+  level: if ISDEV: 'debug' else: 'error',
+  format: if ISDEV: winston.format.prettyPrint() else: winston.format.json()
+  transports: [
+    fileTransport,
+    if ISDEV: new winston.transports.Console()
+  ]
+})
+
+export {
+  logger
+}

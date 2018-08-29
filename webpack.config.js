@@ -17,7 +17,7 @@ const webpackOptions = {
   entry: mainAppEntryPoint,
   output: {
     filename: 'appMain-compiled.js',
-    path: appDir
+    path: projectDir
   },
   externals: [nodeExternals()],
   node: {

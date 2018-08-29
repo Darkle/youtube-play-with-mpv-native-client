@@ -5,12 +5,12 @@
   "main": "",
   "scripts": {
     "ww": "cross-env NODE_ENV=development webpack --watch --max-retries=1 --no-stats",
-    "debug": "cross-env NODE_ENV=development webpack && node --inspect app/appMain-compiled.js",
-    "build": "cross-env NODE_ENV=production webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win app/appMain-compiled.js -o build/openInMpv.exe",
-    "start": "cross-env NODE_ENV=production node app/appMain-compiled.js"
+    "devWatch": "nodemon appMain-compiled.js",
+    "debug": "cross-env NODE_ENV=development webpack && node --inspect appMain-compiled.js",
+    "build": "cross-env NODE_ENV=production webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win appMain-compiled.js -o build/openInMpv.exe",
+    "start": "cross-env NODE_ENV=production node appMain-compiled.js"
   },
   "dependencies": {
-    "@iktakahiro/youtube-url-parser": "^1.0.2",
     "chrome-native-messaging": "^0.2.0",
     "node-mpv": "git+https://github.com/00SteinsGate00/Node-MPV.git#Node-MPV-2",
     "p-finally": "^1.0.0",
@@ -24,6 +24,7 @@
     "babel-loader": "^7.1.5",
     "cross-env": "^5.2.0",
     "eslint": "^4.8.0",
+    "nodemon": "^1.18.3",
     "pkg": "^4.3.4",
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0",
