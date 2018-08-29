@@ -26,6 +26,8 @@ type NativeMessage = {
   mpvOptions: MpvOptions
 };
 mpvPath = path.join(process.cwd(), 'mpv.exe')
+cookiesFilePath = path.join(process.cwd(), 'cookies.txt')
+
 // input = new nativeMessage.Input()
 // transform = new nativeMessage.Transform(messageHandler)
 // output = new nativeMessage.Output()
@@ -50,8 +52,8 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
 
   if !ytParser.isValid(url): return
 
-  cookiesFilePath = createCookiesFile(cookies)
-  mpv = createNewMpvInstance(mpvOptions, cookiesFilePath)
+  createCookiesFile(cookies)
+  mpv = createNewMpvInstance(mpvOptions)
 
   mpv.on('crashed', () ->
     logger.error('mpv crashed')
@@ -75,7 +77,7 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
   )
   .catch(logger.error)
 
-createNewMpvInstance(mpvOptions:MpvOptions, cookiesFilePath:string) ->
+createNewMpvInstance(mpvOptions:MpvOptions) ->
   new mpvAPI(
     {'binary': mpvPath},
     [
@@ -100,9 +102,7 @@ generateScriptOpts(osc:string):string ->
   `--script-opts=osc-scalewindowed=1.2`
 
 createCookiesFile(cookies:string):string ->
-  cookiesFilePath = path.join(process.cwd(), 'cookies.txt')
   fs.writeFileSync(cookiesFilePath, cookies)
-  cookiesFilePath
 
 /*****
 * I had some issues with mpv where if the youtube url had stuff at the end of it -

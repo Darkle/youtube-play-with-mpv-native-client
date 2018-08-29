@@ -129,6 +129,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 //TODO:remove this and its file when done
 
 const mpvPath = _path2.default.join(process.cwd(), 'mpv.exe');
+// import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
+
+const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
+
 // input = new nativeMessage.Input()
 // transform = new nativeMessage.Transform(messageHandler)
 // output = new nativeMessage.Output()
@@ -141,8 +145,6 @@ const mpvPath = _path2.default.join(process.cwd(), 'mpv.exe');
 
 //TODO: remove this
 // messageHandler(videoWithTimeStamp, null, () -> return)
-
-// import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
 messageHandler(_debugMockData.videoNoTimeStamp, null, function () {
   return;
 });
@@ -157,8 +159,8 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
 
   if (!ytParser.isValid(url)) return;
 
-  const cookiesFilePath = createCookiesFile(cookies);
-  const mpv = createNewMpvInstance(mpvOptions, cookiesFilePath);
+  createCookiesFile(cookies);
+  const mpv = createNewMpvInstance(mpvOptions);
 
   mpv.on('crashed', function () {
     _logging.logger.error('mpv crashed');
@@ -178,7 +180,7 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   }).then(function () {
     if (mpvOptions.startMPVpaused) return mpv.pause();
   }), done).catch(_logging.logger.error);
-}function createNewMpvInstance(mpvOptions, cookiesFilePath) {
+}function createNewMpvInstance(mpvOptions) {
   return new _nodeMpv2.default({ 'binary': mpvPath }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
 }function generateMPVwindowSizeOpts(defaultMpvWindowSize) {
   return defaultMpvWindowSize === 'off' ? `` : `--autofit=${defaultMpvWindowSize}`;
@@ -188,9 +190,7 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   if (osc === 'box') return `--script-opts=osc-layout=box,osc-scalewindowed=1.2`;
   return `--script-opts=osc-scalewindowed=1.2`;
 }function createCookiesFile(cookies) {
-  const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
-  _fs2.default.writeFileSync(cookiesFilePath, cookies);
-  return cookiesFilePath;
+  return _fs2.default.writeFileSync(cookiesFilePath, cookies);
 } /*****
   * I had some issues with mpv where if the youtube url had stuff at the end of it -
   * e.g. https://www.youtube.com/watch?v=WUC863mOtTc&feature=youtu.be&t=2398, then
