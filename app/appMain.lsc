@@ -4,15 +4,22 @@ import fs from 'fs'
 import mpvAPI from 'node-mpv'
 import nativeMessage from 'chrome-native-messaging'
 import pFinally from 'p-finally'
-import youtubeRegex from 'youtube-regex'
 import winston from 'winston'
 import 'winston-daily-rotate-file'
-import getYoutubeId from 'get-youtube-id'
+import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
 
 /*****
 * Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
 */
-
+type Settings = {
+  volume: number,
+  alwaysOnTop: boolean,
+  videoQuality: string,
+  defaultMpvWindowSize: string,
+  dontLetYTpageVideoAutoLoad: boolean,
+  oscStyle: string,
+  startMPVpaused: boolean
+};
 input = new nativeMessage.Input()
 transform = new nativeMessage.Transform(messageHandler)
 output = new nativeMessage.Output()
@@ -37,45 +44,61 @@ process.stdin
   .pipe(process.stdout)
 
 messageHandler({url, cookies, mpvOptions}, push, done):void ->
+  logger.debug('messageHandler')
+  logger.debug(url)
+  logger.debug(cookies)
+  logger.debug(mpvOptions)
   if !isValidYoutubeUrl(url): return
 
-  sort out getting the position if the vid doesnt start at the beginning
+  // sort out getting the position if the vid doesnt start at the beginning
+  // https://github.com/iktakahiro/youtube-url-parser
 
-  cookiesFilePath = createCookiesFile(cookies)
-  mpv = createNewMpvInstance(mpvOptions, cookiesFilePath)
-  mpv.on('crashed', () ->
-    logger.error('mpv crashed')
-    done()
-  )
+  // cookiesFilePath = createCookiesFile(cookies)
+  // mpv = createNewMpvInstance(mpvOptions, cookiesFilePath)
+  // mpv.on('crashed', () ->
+  //   logger.error('mpv crashed')
+  //   done()
+  // )
 
-  mpv.setMultipleProperties({
-    'volume': mpvOptions.volume
-  })
+  // mpv.setMultipleProperties({
+  //   'volume': mpvOptions.volume
+  // })
 
-  pFinally(
-    mpv.start()
-      .then(() -> mpv.load(cleanYoutubeUrl(url)))
-      .then(() ->
-        if mpvOptions.startingPosition:
-          mpv.goToPosition(mpvOptions.startTime)
-      )
-    , done
-  )
-  .catch(logger.error)
+  // pFinally(
+  //   mpv.start()
+  //     .then(() -> mpv.load(cleanYoutubeUrl(url)))
+  //     .then(() ->
+  //       if mpvOptions.startingPosition:
+  //         mpv.goToPosition(mpvOptions.startTime)
+  //     )
+  //   , done
+  // )
+  // .catch(logger.error)
 
-https://mpv.io/manual/stable/#options-ytdl-format
-https://mpv.io/manual/stable/#options-ontop
-https://mpv.io/manual/stable/#options-autofit - for mpvWindowSize
-https://mpv.io/manual/stable/#options-pause - start in a paused state
+// https://mpv.io/manual/stable/#options-ytdl-format
+// https://mpv.io/manual/stable/#options-ontop
+// https://mpv.io/manual/stable/#options-autofit - for defaultMpvWindowSize - if 'off' ignore it
+// https://mpv.io/manual/stable/#options-pause - start in a paused state
+// https://mpv.io/manual/stable/#input-conf
+// https://github.com/mpv-player/mpv/blob/master/etc/input.conf
+// https://mpv.io/manual/stable/#on-screen-controller-scalewindowed - add this automatically
+// https://mpv.io/manual/stable/#on-screen-controller-visibility always show the osc
+// https://mpv.io/manual/stable/#options-pause pause on start
 createNewMpvInstance(mpvOptions, cookiesFilePath) ->
+if startMPVpaused: --pause
   new mpvAPI(
     {'debug': false},
     [
       '--cookies',
       `--cookies-file="${ cookiesFilePath }"`,
-      `--ytdl-raw-options=cookies="${ cookiesFilePath }"`
+      `--ytdl-raw-options=cookies="${ cookiesFilePath }"`,
+        generateScriptOpts(osc)
     ]
   )
+
+generateScriptOpts(osc:string):string ->
+  if osc === 'box': `--script-opts=osc-layout=box,osc-scalewindowed=1.2`
+  else: `--script-opts=osc-scalewindowed=1.2`
 
 createCookiesFile(cookies):string ->
   cookiesFilePath = path.join(process.env.TEMP, 'cookies.txt')
@@ -83,7 +106,8 @@ createCookiesFile(cookies):string ->
   cookiesFilePath
 
 isValidYoutubeUrl(url:string):boolean ->
-  url.length < 1000 && youtubeRegex().test(url)
+  parser = new YouTubeURLParser(url)
+  url.length < 1000 && parser.isValid()
 
 /*****
 * I had some issues with mpv where if the youtube url had stuff at the end of it -
@@ -91,7 +115,8 @@ isValidYoutubeUrl(url:string):boolean ->
 * mpv would seem to ignore any command line flags after the url, so gonna clean it.
 */
 cleanYoutubeUrl(url:string):string ->
-  `https://www.youtube.com/watch?v=${ getYoutubeId(url) }`
+  parser = new YouTubeURLParser(url)
+  `https://www.youtube.com/watch?v=${ parser.getId() }`
 
 
 process.on('unhandledRejection', logger.error)
