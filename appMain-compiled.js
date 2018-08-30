@@ -81,16 +81,157 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./app/appMain.lsc");
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
-/******/ ({
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ "./app/YoutubeParser.lsc":
-/*!*******************************!*\
-  !*** ./app/YoutubeParser.lsc ***!
-  \*******************************/
-/*! no static exports found */
+"use strict";
+
+
+var _path = __webpack_require__(1);
+
+var _path2 = _interopRequireDefault(_path);
+
+var _fs = __webpack_require__(2);
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _crypto = __webpack_require__(3);
+
+var _crypto2 = _interopRequireDefault(_crypto);
+
+var _nodeMpv = __webpack_require__(4);
+
+var _nodeMpv2 = _interopRequireDefault(_nodeMpv);
+
+var _chromeNativeMessaging = __webpack_require__(5);
+
+var _chromeNativeMessaging2 = _interopRequireDefault(_chromeNativeMessaging);
+
+var _pFinally = __webpack_require__(6);
+
+var _pFinally2 = _interopRequireDefault(_pFinally);
+
+var _YoutubeParser = __webpack_require__(7);
+
+var _logging = __webpack_require__(10);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
+const mpvPath = _path2.default.join(getMpvBinaryDir(), 'mpv.exe');
+const cookiesFilePath = _path2.default.join(getMpvBinaryDir(), 'cookies.txt');
+const input = new _chromeNativeMessaging2.default.Input();
+const transform = new _chromeNativeMessaging2.default.Transform(messageHandler);
+const output = new _chromeNativeMessaging2.default.Output();
+
+/*****
+* Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
+*/
+function messageHandler({ url, cookies, mpvOptions }, push, done) {
+  const ytParser = new _YoutubeParser.YouTubeURLParser(url);
+  if (!ytParser.isValid(url)) return;
+  createCookiesFile(cookies);
+  const mpvPlayer = createNewMpvInstance(mpvOptions);
+
+  (0, _pFinally2.default)(mpvPlayer.start().then(function () {
+    return mpvPlayer.volume(mpvOptions.volume);
+  }).then(function () {
+    return mpvPlayer.load(cleanYoutubeUrl(url));
+  }).then(function () {
+    const videoStartPosition = ytParser.getStartAtSecond();
+    // If it's 10 seconds or less then it's not worth skipping ahead
+    if (videoStartPosition > 10) {
+      return mpvPlayer.goToPosition(videoStartPosition);
+    }
+  }).then(function () {
+    if (mpvOptions.startMPVpaused) return mpvPlayer.pause();
+  }), done).catch(_logging.logger.error);
+
+  mpvPlayer.on('crashed', function () {
+    _logging.logger.error('mpv crashed');
+    done();
+    return setTimeout(function () {
+      return process.exit(1);
+    }, 3000);
+  });
+}function createNewMpvInstance(mpvOptions) {
+  return new _nodeMpv2.default({
+    binary: mpvPath,
+    socket: `\\\\.\\pipe\\mpvserver${generateRandomString()}`
+  }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
+}function generateRandomString() {
+  return _crypto2.default.randomBytes(8).toString('hex');
+}function generateMPVwindowSizeOpts(defaultMpvWindowSize) {
+  return defaultMpvWindowSize === 'off' ? `` : `--autofit=${defaultMpvWindowSize}`;
+}function generateYTvideoQualityOpts(videoQuality) {
+  return videoQuality === 'original' ? `` : `--ytdl-format=${videoQuality}`;
+}function generateScriptOpts(osc) {
+  if (osc === 'box') return `--script-opts=osc-layout=box,osc-scalewindowed=1.2`;
+  return `--script-opts=osc-scalewindowed=1.2`;
+}function createCookiesFile(cookies) {
+  return _fs2.default.writeFileSync(cookiesFilePath, cookies);
+} /*****
+  * I had some issues with mpv where if the youtube url had stuff at the end of it -
+  * e.g. https://www.youtube.com/watch?v=WUC863mOtTc&feature=youtu.be&t=2398, then
+  * mpv would seem to ignore any command line flags after the url, so gonna clean it.
+  */
+function cleanYoutubeUrl(url) {
+  const parser = new _YoutubeParser.YouTubeURLParser(url);
+  return `https://www.youtube.com/watch?v=${parser.getId()}`;
+} /*****
+  * If we're debugging the non-built version, our cwd will be the project
+  * dir, but if we're debugging the built version, the cwd will just
+  * be process.cwd()
+  */
+function getMpvBinaryDir() {
+  if (false) {}
+  return process.cwd();
+}process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout);
+process.on('unhandledRejection', _logging.logger.error);
+process.on('uncaughtException', _logging.logger.error);
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports) {
+
+module.exports = require("fs");
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("crypto");
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+module.exports = require("node-mpv");
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("chrome-native-messaging");
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = require("p-finally");
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -101,7 +242,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.YouTubeURLParser = undefined;
 
-var _qs = __webpack_require__(/*! qs */ "qs");
+var _qs = __webpack_require__(8);
 
 const validHost = /^(www.youtube.com|youtu.be)$/; /*****
                                                   * This is a forked version of '@iktakahiro/youtube-url-parser'
@@ -110,7 +251,7 @@ const validHost = /^(www.youtube.com|youtu.be)$/; /*****
 const validPathname = /^.*\/([a-zA-Z0-9_-]{11})$/;
 const validId = /^([a-zA-Z0-9_-]{11})$/;
 const validStartAt = /^((\d{1,2})h)?((\d{1,2})m)?((\d{1,2})s)?$/;
-const URL = process ? __webpack_require__(/*! url */ "url").URL : URL;
+const URL = process ? __webpack_require__(9).URL : URL;
 
 let YouTubeURLParser = exports.YouTubeURLParser = class YouTubeURLParser {
     constructor(url) {
@@ -243,127 +384,19 @@ let YouTubeURLParser = exports.YouTubeURLParser = class YouTubeURLParser {
 };
 
 /***/ }),
+/* 8 */
+/***/ (function(module, exports) {
 
-/***/ "./app/appMain.lsc":
-/*!*************************!*\
-  !*** ./app/appMain.lsc ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _path = __webpack_require__(/*! path */ "path");
-
-var _path2 = _interopRequireDefault(_path);
-
-var _fs = __webpack_require__(/*! fs */ "fs");
-
-var _fs2 = _interopRequireDefault(_fs);
-
-var _crypto = __webpack_require__(/*! crypto */ "crypto");
-
-var _crypto2 = _interopRequireDefault(_crypto);
-
-var _nodeMpv = __webpack_require__(/*! node-mpv */ "node-mpv");
-
-var _nodeMpv2 = _interopRequireDefault(_nodeMpv);
-
-var _chromeNativeMessaging = __webpack_require__(/*! chrome-native-messaging */ "chrome-native-messaging");
-
-var _chromeNativeMessaging2 = _interopRequireDefault(_chromeNativeMessaging);
-
-var _pFinally = __webpack_require__(/*! p-finally */ "p-finally");
-
-var _pFinally2 = _interopRequireDefault(_pFinally);
-
-var _YoutubeParser = __webpack_require__(/*! ./YoutubeParser.lsc */ "./app/YoutubeParser.lsc");
-
-var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/logging.lsc");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
-const mpvPath = _path2.default.join(getMpvBinaryDir(), 'mpv.exe');
-const cookiesFilePath = _path2.default.join(getMpvBinaryDir(), 'cookies.txt');
-const input = new _chromeNativeMessaging2.default.Input();
-const transform = new _chromeNativeMessaging2.default.Transform(messageHandler);
-const output = new _chromeNativeMessaging2.default.Output();
-
-/*****
-* Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
-*/
-function messageHandler({ url, cookies, mpvOptions }, push, done) {
-  const ytParser = new _YoutubeParser.YouTubeURLParser(url);
-  if (!ytParser.isValid(url)) return;
-  createCookiesFile(cookies);
-  const mpvPlayer = createNewMpvInstance(mpvOptions);
-
-  (0, _pFinally2.default)(mpvPlayer.start().then(function () {
-    return mpvPlayer.volume(mpvOptions.volume);
-  }).then(function () {
-    return mpvPlayer.load(cleanYoutubeUrl(url));
-  }).then(function () {
-    const videoStartPosition = ytParser.getStartAtSecond();
-    // If it's 10 seconds or less then it's not worth skipping ahead
-    if (videoStartPosition > 10) {
-      return mpvPlayer.goToPosition(videoStartPosition);
-    }
-  }).then(function () {
-    if (mpvOptions.startMPVpaused) return mpvPlayer.pause();
-  }), done).catch(_logging.logger.error);
-
-  mpvPlayer.on('crashed', function () {
-    _logging.logger.error('mpv crashed');
-    done();
-    return setTimeout(function () {
-      return process.exit(1);
-    }, 3000);
-  });
-}function createNewMpvInstance(mpvOptions) {
-  return new _nodeMpv2.default({
-    binary: mpvPath,
-    socket: `\\\\.\\pipe\\mpvserver${generateRandomString()}`
-  }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
-}function generateRandomString() {
-  return _crypto2.default.randomBytes(8).toString('hex');
-}function generateMPVwindowSizeOpts(defaultMpvWindowSize) {
-  return defaultMpvWindowSize === 'off' ? `` : `--autofit=${defaultMpvWindowSize}`;
-}function generateYTvideoQualityOpts(videoQuality) {
-  return videoQuality === 'original' ? `` : `--ytdl-format=${videoQuality}`;
-}function generateScriptOpts(osc) {
-  if (osc === 'box') return `--script-opts=osc-layout=box,osc-scalewindowed=1.2`;
-  return `--script-opts=osc-scalewindowed=1.2`;
-}function createCookiesFile(cookies) {
-  return _fs2.default.writeFileSync(cookiesFilePath, cookies);
-} /*****
-  * I had some issues with mpv where if the youtube url had stuff at the end of it -
-  * e.g. https://www.youtube.com/watch?v=WUC863mOtTc&feature=youtu.be&t=2398, then
-  * mpv would seem to ignore any command line flags after the url, so gonna clean it.
-  */
-function cleanYoutubeUrl(url) {
-  const parser = new _YoutubeParser.YouTubeURLParser(url);
-  return `https://www.youtube.com/watch?v=${parser.getId()}`;
-} /*****
-  * If we're debugging the non-built version, our cwd will be the project
-  * dir, but if we're debugging the built version, the cwd will just
-  * be process.cwd()
-  */
-function getMpvBinaryDir() {
-  if (true) return 'debug';
-  return process.cwd();
-}process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout);
-process.on('unhandledRejection', _logging.logger.error);
-process.on('uncaughtException', _logging.logger.error);
+module.exports = require("qs");
 
 /***/ }),
+/* 9 */
+/***/ (function(module, exports) {
 
-/***/ "./app/logging.lsc":
-/*!*************************!*\
-  !*** ./app/logging.lsc ***!
-  \*************************/
-/*! no static exports found */
+module.exports = require("url");
+
+/***/ }),
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -374,17 +407,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.logger = undefined;
 
-var _winston = __webpack_require__(/*! winston */ "winston");
+var _winston = __webpack_require__(11);
 
 var _winston2 = _interopRequireDefault(_winston);
 
-__webpack_require__(/*! winston-daily-rotate-file */ "winston-daily-rotate-file");
+__webpack_require__(12);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 const fileTransport = new _winston2.default.transports.DailyRotateFile({
   filename: 'yt-open-in-mpv-native-client-%DATE%.log',
-  dirname:  true ? 'debug' : undefined,
+  dirname:  false ? undefined : '.',
   datePattern: 'YYYY-MM-DD-HH',
   maxSize: '20m',
   maxFiles: 5
@@ -392,127 +425,27 @@ const fileTransport = new _winston2.default.transports.DailyRotateFile({
 
 const transports = [fileTransport];
 
-if (true) transports.push(new _winston2.default.transports.Console());
+if (false) {}
 
 const logger = _winston2.default.createLogger({
-  level:  true ? 'debug' : undefined,
-  format:  true ? _winston2.default.format.prettyPrint() : undefined,
+  level:  false ? undefined : 'error',
+  format:  false ? undefined : _winston2.default.format.json(),
   transports
 });
 
 exports.logger = logger;
 
 /***/ }),
-
-/***/ "chrome-native-messaging":
-/*!******************************************!*\
-  !*** external "chrome-native-messaging" ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("chrome-native-messaging");
-
-/***/ }),
-
-/***/ "crypto":
-/*!*************************!*\
-  !*** external "crypto" ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("crypto");
-
-/***/ }),
-
-/***/ "fs":
-/*!*********************!*\
-  !*** external "fs" ***!
-  \*********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("fs");
-
-/***/ }),
-
-/***/ "node-mpv":
-/*!***************************!*\
-  !*** external "node-mpv" ***!
-  \***************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("node-mpv");
-
-/***/ }),
-
-/***/ "p-finally":
-/*!****************************!*\
-  !*** external "p-finally" ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("p-finally");
-
-/***/ }),
-
-/***/ "path":
-/*!***********************!*\
-  !*** external "path" ***!
-  \***********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("path");
-
-/***/ }),
-
-/***/ "qs":
-/*!*********************!*\
-  !*** external "qs" ***!
-  \*********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("qs");
-
-/***/ }),
-
-/***/ "url":
-/*!**********************!*\
-  !*** external "url" ***!
-  \**********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("url");
-
-/***/ }),
-
-/***/ "winston":
-/*!**************************!*\
-  !*** external "winston" ***!
-  \**************************/
-/*! no static exports found */
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = require("winston");
 
 /***/ }),
-
-/***/ "winston-daily-rotate-file":
-/*!********************************************!*\
-  !*** external "winston-daily-rotate-file" ***!
-  \********************************************/
-/*! no static exports found */
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = require("winston-daily-rotate-file");
 
 /***/ })
-
-/******/ });
-//# sourceMappingURL=appMain-compiled.js.map
+/******/ ]);

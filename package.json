@@ -1,6 +1,6 @@
 {
   "name": "youtube-play-with-mpv-native-client",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "",
   "scripts": {
@@ -9,7 +9,7 @@
     "lintWatch": "esw -w --ext .lsc -c .eslintrc.json --color --clear",
     "debug": "cross-env NODE_ENV=development webpack && node --inspect appMain-compiled.js",
     "buildDev": "cross-env NODE_ENV=development IS_BUILD_DEBUG=true webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json debug && pkg -t node8-win appMain-compiled.js -o debug/yt-open-in-mpv.exe",
-    "buildProd": "cross-env NODE_ENV=production webpack && pkg -t node8-win appMain-compiled.js -o build/yt-open-in-mpv.exe",
+    "buildProd": "cross-env NODE_ENV=production webpack && pkg -t node8-win appMain-compiled.js -o build/node-pkg-binary/yt-open-in-mpv.exe",
     "start": "cross-env NODE_ENV=production node appMain-compiled.js"
   },
   "dependencies": {
