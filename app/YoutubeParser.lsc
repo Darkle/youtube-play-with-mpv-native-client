@@ -1,5 +1,5 @@
 /*****
-* This is a forked versio of '@iktakahiro/youtube-url-parser'
+* This is a forked version of '@iktakahiro/youtube-url-parser'
 */
 import { stringify, parse } from "qs"
 
