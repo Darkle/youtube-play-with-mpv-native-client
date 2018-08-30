@@ -23,8 +23,8 @@ type NativeMessage = {
   cookies: string,
   mpvOptions: MpvOptions
 };
-mpvPath = path.join(process.cwd(), 'mpv.exe')
-cookiesFilePath = path.join(process.cwd(), 'cookies.txt')
+mpvPath = path.join(process.cwd(), (ISDEV? 'debug': ''), 'mpv.exe')
+cookiesFilePath = path.join(process.cwd(), (ISDEV? 'debug': ''), 'cookies.txt')
 
 input = new nativeMessage.Input()
 transform = new nativeMessage.Transform(messageHandler)

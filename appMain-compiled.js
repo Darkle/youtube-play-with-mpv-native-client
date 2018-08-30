@@ -285,8 +285,8 @@ var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/logging.lsc");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
-const mpvPath = _path2.default.join(process.cwd(), 'mpv.exe');
-const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
+const mpvPath = _path2.default.join(process.cwd(),  true ? 'debug' : undefined, 'mpv.exe');
+const cookiesFilePath = _path2.default.join(process.cwd(),  true ? 'debug' : undefined, 'cookies.txt');
 
 const input = new _chromeNativeMessaging2.default.Input();
 const transform = new _chromeNativeMessaging2.default.Transform(messageHandler);
@@ -377,6 +377,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 const fileTransport = new _winston2.default.transports.DailyRotateFile({
   filename: 'yt-open-in-mpv-native-client-%DATE%.log',
+  dirname:  true ? 'debug' : undefined,
   datePattern: 'YYYY-MM-DD-HH',
   maxSize: '20m',
   maxFiles: 5
