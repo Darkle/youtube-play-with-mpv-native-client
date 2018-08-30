@@ -1,5 +1,6 @@
 import path from 'path'
 import fs from 'fs'
+import crypto from 'crypto'
 
 import mpvAPI from 'node-mpv'
 import nativeMessage from 'chrome-native-messaging'
@@ -32,12 +33,6 @@ input = new nativeMessage.Input()
 transform = new nativeMessage.Transform(messageHandler)
 output = new nativeMessage.Output()
 
-process.stdin
-  .pipe(input)
-  .pipe(transform)
-  .pipe(output)
-  .pipe(process.stdout)
-
 //TODO: remove this
 // messageHandler(videoWithTimeStamp, null, () -> return)
 // messageHandler(videoNoTimeStamp, null, () -> return)
@@ -56,59 +51,38 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
   if !ytParser.isValid(url): return
 
   createCookiesFile(cookies)
-  mpv = createNewMpvInstance(mpvOptions)
-
-  mpv.on('crashed', () ->
-    logger.error('mpv crashed')
-    done()
-    // process.exit(0)
-  )
+  mpvPlayer = createNewMpvInstance(mpvOptions)
 
   pFinally(
-    mpv.start()
-      .then(() -> mpv.volume(mpvOptions.volume))
-      .then(() -> mpv.load(cleanYoutubeUrl(url)))
+    mpvPlayer.start()
+      .then(() -> mpvPlayer.volume(mpvOptions.volume))
+      .then(() -> mpvPlayer.load(cleanYoutubeUrl(url)))
       .then(() ->
         videoStartPosition = ytParser.getStartAtSecond()
         // If it's 10 seconds or less then it's not worth skipping ahead
         if videoStartPosition > 10:
-          mpv.goToPosition(videoStartPosition)
+          mpvPlayer.goToPosition(videoStartPosition)
       )
       .then(() ->
-        if mpvOptions.startMPVpaused: mpv.pause()
+        if mpvOptions.startMPVpaused: mpvPlayer.pause()
       )
-    ,
-    () ->
-      done()
-      // process.exit(0)
+    , done
   )
   .catch(logger.error)
 
-  player.socket.on('message', data => {
-    if (data.event) {
-      switch (data.event) {
-        case 'file-loaded':
-          loadedBeforeEnded = true
-
-          done()
-          process.exit(0)
-
-          break
-        case 'end-file':
-          if (!loadedBeforeEnded) {
-            done()
-            process.exit(1)
-          }
-          process.exit(0)
-          break
-      }
-    }
-  })
-
+  mpvPlayer.on('crashed', () ->
+    logger.error('mpv crashed')
+    done()
+    setTimeout(() -> process.exit(1), 3000)
+  )
 
 createNewMpvInstance(mpvOptions:MpvOptions) ->
   new mpvAPI(
-    {'binary': mpvPath},
+    {
+      binary: mpvPath,
+      'ipc_command': '--input-ipc-server',
+      socket: `\\\\.\\pipe\\mpvserver${ generateRandomString() }`,
+    },
     [
       '--cookies',
       `--cookies-file="${ cookiesFilePath }"`,
@@ -119,6 +93,9 @@ createNewMpvInstance(mpvOptions:MpvOptions) ->
         generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)
     ]
   )
+
+generateRandomString():string ->
+  crypto.randomBytes(8).toString('hex')
 
 generateMPVwindowSizeOpts(defaultMpvWindowSize:string):string ->
   defaultMpvWindowSize === 'off' ? `` : `--autofit=${ defaultMpvWindowSize }`
@@ -142,6 +119,6 @@ cleanYoutubeUrl(url:string):string ->
   parser = new YouTubeURLParser(url)
   `https://www.youtube.com/watch?v=${ parser.getId() }`
 
-
+process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout)
 process.on('unhandledRejection', logger.error)
 process.on('uncaughtException', logger.error)

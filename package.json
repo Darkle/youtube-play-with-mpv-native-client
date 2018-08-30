@@ -6,9 +6,10 @@
   "scripts": {
     "ww": "cross-env NODE_ENV=development webpack --watch --max-retries=1 --no-stats",
     "devWatch": "nodemon appMain-compiled.js",
+    "lintWatch": "esw -w --ext .lsc -c .eslintrc.json --color --clear",
     "debug": "cross-env NODE_ENV=development webpack && node --inspect appMain-compiled.js",
-    "buildDev": "cross-env NODE_ENV=development webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win appMain-compiled.js -o build/openInMpv.exe",
-    "buildProd": "cross-env NODE_ENV=production webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win appMain-compiled.js -o build/openInMpv.exe",
+    "buildDev": "cross-env NODE_ENV=development webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win appMain-compiled.js -o build/yt-open-in-mpv.exe",
+    "buildProd": "cross-env NODE_ENV=production webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json build && pkg -t node8-win appMain-compiled.js -o build/yt-open-in-mpv.exe",
     "start": "cross-env NODE_ENV=production node appMain-compiled.js"
   },
   "dependencies": {
@@ -23,9 +24,11 @@
     "@oigroup/babel-preset-lightscript": "^3.1.1",
     "@oigroup/lightscript-eslint": "^3.1.1",
     "babel-core": "^6.26.3",
+    "babel-eslint": "^9.0.0",
     "babel-loader": "^7.1.5",
     "cross-env": "^5.2.0",
-    "eslint": "^4.8.0",
+    "eslint": "^5.4.0",
+    "eslint-watch": "^4.0.2",
     "nodemon": "^1.18.3",
     "pkg": "^4.3.4",
     "webpack": "^4.17.1",

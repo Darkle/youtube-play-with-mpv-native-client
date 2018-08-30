@@ -81,44 +81,43 @@
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./app/appMain.lsc");
+/******/ 	return __webpack_require__(__webpack_require__.s = 0);
 /******/ })
 /************************************************************************/
-/******/ ({
-
-/***/ "./app/appMain.lsc":
-/*!*************************!*\
-  !*** ./app/appMain.lsc ***!
-  \*************************/
-/*! no static exports found */
+/******/ ([
+/* 0 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _path = __webpack_require__(/*! path */ "path");
+var _path = __webpack_require__(1);
 
 var _path2 = _interopRequireDefault(_path);
 
-var _fs = __webpack_require__(/*! fs */ "fs");
+var _fs = __webpack_require__(2);
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _nodeMpv = __webpack_require__(/*! node-mpv */ "node-mpv");
+var _crypto = __webpack_require__(3);
+
+var _crypto2 = _interopRequireDefault(_crypto);
+
+var _nodeMpv = __webpack_require__(4);
 
 var _nodeMpv2 = _interopRequireDefault(_nodeMpv);
 
-var _chromeNativeMessaging = __webpack_require__(/*! chrome-native-messaging */ "chrome-native-messaging");
+var _chromeNativeMessaging = __webpack_require__(5);
 
 var _chromeNativeMessaging2 = _interopRequireDefault(_chromeNativeMessaging);
 
-var _pFinally = __webpack_require__(/*! p-finally */ "p-finally");
+var _pFinally = __webpack_require__(6);
 
 var _pFinally2 = _interopRequireDefault(_pFinally);
 
-var _parsertest = __webpack_require__(/*! ./parsertest.lsc */ "./app/parsertest.lsc");
+var _parsertest = __webpack_require__(7);
 
-var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/logging.lsc");
+var _logging = __webpack_require__(10);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -132,8 +131,6 @@ const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
 const input = new _chromeNativeMessaging2.default.Input();
 const transform = new _chromeNativeMessaging2.default.Transform(messageHandler);
 const output = new _chromeNativeMessaging2.default.Output();
-
-process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout);
 
 //TODO: remove this
 // messageHandler(videoWithTimeStamp, null, () -> return)
@@ -153,53 +150,37 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   if (!ytParser.isValid(url)) return;
 
   createCookiesFile(cookies);
-  const mpv = createNewMpvInstance(mpvOptions);
+  const mpvPlayer = createNewMpvInstance(mpvOptions);
 
-  mpv.on('crashed', function () {
-    _logging.logger.error('mpv crashed');
-    return done();
-  } // process.exit(0)
-  );
-
-  (0, _pFinally2.default)(mpv.start().then(function () {
-    return mpv.volume(mpvOptions.volume);
+  (0, _pFinally2.default)(mpvPlayer.start().then(function () {
+    return mpvPlayer.volume(mpvOptions.volume);
   }).then(function () {
-    return mpv.load(cleanYoutubeUrl(url));
+    return mpvPlayer.load(cleanYoutubeUrl(url));
   }).then(function () {
     const videoStartPosition = ytParser.getStartAtSecond();
     // If it's 10 seconds or less then it's not worth skipping ahead
     if (videoStartPosition > 10) {
-      return mpv.goToPosition(videoStartPosition);
+      return mpvPlayer.goToPosition(videoStartPosition);
     }
   }).then(function () {
-    if (mpvOptions.startMPVpaused) return mpv.pause();
-  }), function () {
-    return done();
-  } // process.exit(0)
-  ).catch(_logging.logger.error);
+    if (mpvOptions.startMPVpaused) return mpvPlayer.pause();
+  }), done).catch(_logging.logger.error);
 
-  player.socket.on('message', data => {
-    if (data.event) {
-      switch (data.event) {
-        case 'file-loaded':
-          const loadedBeforeEnded = true;
-
-          done();
-          process.exit(0);
-
-          break;
-        case 'end-file':
-          if (!loadedBeforeEnded) {
-            done();
-            process.exit(1);
-          }
-          process.exit(0);
-          break;
-      }
-    }
+  mpvPlayer.on('crashed', function () {
+    _logging.logger.error('mpv crashed');
+    done();
+    return setTimeout(function () {
+      return process.exit(1);
+    }, 3000);
   });
 }function createNewMpvInstance(mpvOptions) {
-  return new _nodeMpv2.default({ 'binary': mpvPath }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
+  return new _nodeMpv2.default({
+    binary: mpvPath,
+    'ipc_command': '--input-ipc-server',
+    socket: `\\\\.\\pipe\\mpvserver${generateRandomString()}`
+  }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
+}function generateRandomString() {
+  return _crypto2.default.randomBytes(8).toString('hex');
 }function generateMPVwindowSizeOpts(defaultMpvWindowSize) {
   return defaultMpvWindowSize === 'off' ? `` : `--autofit=${defaultMpvWindowSize}`;
 }function generateYTvideoQualityOpts(videoQuality) {
@@ -217,60 +198,48 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
 function cleanYoutubeUrl(url) {
   const parser = new _parsertest.YouTubeURLParser(url);
   return `https://www.youtube.com/watch?v=${parser.getId()}`;
-}process.on('unhandledRejection', _logging.logger.error);
+}process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout);
+process.on('unhandledRejection', _logging.logger.error);
 process.on('uncaughtException', _logging.logger.error);
 
 /***/ }),
+/* 1 */
+/***/ (function(module, exports) {
 
-/***/ "./app/logging.lsc":
-/*!*************************!*\
-  !*** ./app/logging.lsc ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.logger = undefined;
-
-var _winston = __webpack_require__(/*! winston */ "winston");
-
-var _winston2 = _interopRequireDefault(_winston);
-
-__webpack_require__(/*! winston-daily-rotate-file */ "winston-daily-rotate-file");
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-const fileTransport = new _winston2.default.transports.DailyRotateFile({
-  filename: 'yt-open-in-mpv-native-client-%DATE%.log',
-  datePattern: 'YYYY-MM-DD-HH',
-  maxSize: '20m',
-  maxFiles: '7d'
-});
-
-const transports = [fileTransport];
-
-if (true) transports.push(new _winston2.default.transports.Console());
-
-const logger = _winston2.default.createLogger({
-  level: 'debug',
-  format:  true ? _winston2.default.format.prettyPrint() : undefined,
-  transports
-});
-
-exports.logger = logger;
+module.exports = require("path");
 
 /***/ }),
+/* 2 */
+/***/ (function(module, exports) {
 
-/***/ "./app/parsertest.lsc":
-/*!****************************!*\
-  !*** ./app/parsertest.lsc ***!
-  \****************************/
-/*! no static exports found */
+module.exports = require("fs");
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("crypto");
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+module.exports = require("node-mpv");
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("chrome-native-messaging");
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = require("p-finally");
+
+/***/ }),
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -281,13 +250,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.YouTubeURLParser = undefined;
 
-var _qs = __webpack_require__(/*! qs */ "qs");
+var _qs = __webpack_require__(8);
 
 const validHost = /^(www.youtube.com|youtu.be)$/;
 const validPathname = /^.*\/([a-zA-Z0-9_-]{11})$/;
 const validId = /^([a-zA-Z0-9_-]{11})$/;
 const validStartAt = /^((\d{1,2})h)?((\d{1,2})m)?((\d{1,2})s)?$/;
-const URL = process ? __webpack_require__(/*! url */ "url").URL : URL;
+const URL = process ? __webpack_require__(9).URL : URL;
 
 let YouTubeURLParser = exports.YouTubeURLParser = class YouTubeURLParser {
     constructor(url) {
@@ -420,105 +389,67 @@ let YouTubeURLParser = exports.YouTubeURLParser = class YouTubeURLParser {
 };
 
 /***/ }),
-
-/***/ "chrome-native-messaging":
-/*!******************************************!*\
-  !*** external "chrome-native-messaging" ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("chrome-native-messaging");
-
-/***/ }),
-
-/***/ "fs":
-/*!*********************!*\
-  !*** external "fs" ***!
-  \*********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("fs");
-
-/***/ }),
-
-/***/ "node-mpv":
-/*!***************************!*\
-  !*** external "node-mpv" ***!
-  \***************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("node-mpv");
-
-/***/ }),
-
-/***/ "p-finally":
-/*!****************************!*\
-  !*** external "p-finally" ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("p-finally");
-
-/***/ }),
-
-/***/ "path":
-/*!***********************!*\
-  !*** external "path" ***!
-  \***********************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = require("path");
-
-/***/ }),
-
-/***/ "qs":
-/*!*********************!*\
-  !*** external "qs" ***!
-  \*********************/
-/*! no static exports found */
+/* 8 */
 /***/ (function(module, exports) {
 
 module.exports = require("qs");
 
 /***/ }),
-
-/***/ "url":
-/*!**********************!*\
-  !*** external "url" ***!
-  \**********************/
-/*! no static exports found */
+/* 9 */
 /***/ (function(module, exports) {
 
 module.exports = require("url");
 
 /***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ "winston":
-/*!**************************!*\
-  !*** external "winston" ***!
-  \**************************/
-/*! no static exports found */
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.logger = undefined;
+
+var _winston = __webpack_require__(11);
+
+var _winston2 = _interopRequireDefault(_winston);
+
+__webpack_require__(12);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const fileTransport = new _winston2.default.transports.DailyRotateFile({
+  filename: 'yt-open-in-mpv-native-client-%DATE%.log',
+  datePattern: 'YYYY-MM-DD-HH',
+  maxSize: '20m',
+  maxFiles: '3d'
+});
+
+const transports = [fileTransport];
+
+if (false) {}
+
+const logger = _winston2.default.createLogger({
+  level: 'debug',
+  format:  false ? undefined : _winston2.default.format.json(),
+  transports
+});
+
+exports.logger = logger;
+
+/***/ }),
+/* 11 */
 /***/ (function(module, exports) {
 
 module.exports = require("winston");
 
 /***/ }),
-
-/***/ "winston-daily-rotate-file":
-/*!********************************************!*\
-  !*** external "winston-daily-rotate-file" ***!
-  \********************************************/
-/*! no static exports found */
+/* 12 */
 /***/ (function(module, exports) {
 
 module.exports = require("winston-daily-rotate-file");
 
 /***/ })
-
-/******/ });
-//# sourceMappingURL=appMain-compiled.js.map
+/******/ ]);

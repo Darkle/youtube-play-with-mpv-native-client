@@ -5,7 +5,7 @@ fileTransport = new (winston.transports.DailyRotateFile)({
   filename: 'yt-open-in-mpv-native-client-%DATE%.log',
   datePattern: 'YYYY-MM-DD-HH',
   maxSize: '20m',
-  maxFiles: '7d'
+  maxFiles: '3d'
 })
 
 transports = [

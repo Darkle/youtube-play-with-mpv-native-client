@@ -39,6 +39,16 @@
             "date": 1535581256668,
             "name": "yt-open-in-mpv-native-client-2018-08-30-08.log",
             "hash": "7fbd2ca6583637842f011610929f75a3"
+        },
+        {
+            "date": 1535585349926,
+            "name": "yt-open-in-mpv-native-client-2018-08-30-09.log",
+            "hash": "bf15a5c47a1e37550f78e3da2278f95d"
+        },
+        {
+            "date": 1535587903516,
+            "name": "yt-open-in-mpv-native-client-2018-08-30-10.log",
+            "hash": "a604afb41a98f7fc892b38540c8fcc2e"
         }
     ]
 }
