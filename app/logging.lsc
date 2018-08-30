@@ -3,7 +3,7 @@ import 'winston-daily-rotate-file'
 
 fileTransport = new (winston.transports.DailyRotateFile)({
   filename: 'yt-open-in-mpv-native-client-%DATE%.log',
-  dirname: ISDEV? 'debug': '.'
+  dirname: ISDEV && !IS_BUILD_DEBUG? 'debug' : '.'
   datePattern: 'YYYY-MM-DD-HH',
   maxSize: '20m',
   maxFiles: 5
