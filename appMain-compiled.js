@@ -297,9 +297,7 @@ const output = new _chromeNativeMessaging2.default.Output();
 */
 function messageHandler({ url, cookies, mpvOptions }, push, done) {
   const ytParser = new _YoutubeParser.YouTubeURLParser(url);
-
   if (!ytParser.isValid(url)) return;
-
   createCookiesFile(cookies);
   const mpvPlayer = createNewMpvInstance(mpvOptions);
 
@@ -327,7 +325,6 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
 }function createNewMpvInstance(mpvOptions) {
   return new _nodeMpv2.default({
     binary: mpvPath,
-    'ipc_command': '--input-ipc-server',
     socket: `\\\\.\\pipe\\mpvserver${generateRandomString()}`
   }, ['--cookies', `--cookies-file="${cookiesFilePath}"`, `--ytdl-raw-options=cookies="${cookiesFilePath}"`, generateScriptOpts(mpvOptions.oscStyle), mpvOptions.alwaysOnTop ? `--ontop` : ``, generateYTvideoQualityOpts(mpvOptions.videoQuality), generateMPVwindowSizeOpts(mpvOptions.defaultMpvWindowSize)]);
 }function generateRandomString() {

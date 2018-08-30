@@ -6,7 +6,7 @@ import mpvAPI from 'node-mpv'
 import nativeMessage from 'chrome-native-messaging'
 import pFinally from 'p-finally'
 // import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
-import {YouTubeURLParser } from './YoutubeParser.lsc'
+import { YouTubeURLParser } from './YoutubeParser.lsc'
 import { logger } from './logging.lsc'
 
 type MpvOptions = {
@@ -35,9 +35,7 @@ output = new nativeMessage.Output()
 */
 messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
   ytParser = new YouTubeURLParser(url)
-
   if !ytParser.isValid(url): return
-
   createCookiesFile(cookies)
   mpvPlayer = createNewMpvInstance(mpvOptions)
 
@@ -68,7 +66,6 @@ createNewMpvInstance(mpvOptions:MpvOptions) ->
   new mpvAPI(
     {
       binary: mpvPath,
-      'ipc_command': '--input-ipc-server',
       socket: `\\\\.\\pipe\\mpvserver${ generateRandomString() }`,
     },
     [
