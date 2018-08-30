@@ -10,6 +10,7 @@
     "debug": "cross-env NODE_ENV=development webpack && node --inspect appMain-compiled.js",
     "buildDev": "cross-env NODE_ENV=development IS_BUILD_DEBUG=true webpack && cp config/input.conf config/net.ccoding.ytplaywithmpv.json debug && pkg -t node8-win appMain-compiled.js -o debug/yt-open-in-mpv.exe",
     "buildProd": "cross-env NODE_ENV=production webpack && pkg -t node8-win appMain-compiled.js -o build/node-pkg-binary/yt-open-in-mpv.exe",
+    "buildInstaller": "cd InstallationMediaMetadata && innosetup-compiler InnoInstallerSetupScript.iss",
     "start": "cross-env NODE_ENV=production node appMain-compiled.js"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "cross-env": "^5.2.0",
     "eslint": "^5.4.0",
     "eslint-watch": "^4.0.2",
+    "innosetup-compiler": "^5.5.9",
     "nodemon": "^1.18.3",
     "pkg": "^4.3.4",
     "webpack": "^4.17.1",
