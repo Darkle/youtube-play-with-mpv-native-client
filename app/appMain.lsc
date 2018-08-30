@@ -38,7 +38,6 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
   if !ytParser.isValid(url): return
   createCookiesFile(cookies)
   mpvPlayer = createNewMpvInstance(mpvOptions)
-  mpvPlayer.on('crashed', () -> logger.error('mpv crashed'))
 
   pFinally(
     mpvPlayer.start()
@@ -56,6 +55,11 @@ messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
     , done
   )
   .catch(logger.error)
+
+  mpvPlayer.on('crashed', () ->
+    logger.error('mpv crashed')
+    done()
+  )
 
 createNewMpvInstance(mpvOptions:MpvOptions) ->
   new mpvAPI(
