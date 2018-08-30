@@ -1,0 +1,9 @@
+{
+  "name": "net.ccoding.ytplaywithmpv",
+  "description": "Native host for the youtube-play-with-mpv-chrome-extension.",
+  "type": "stdio",
+  "path": "yt-open-in-mpv.exe",
+  "allowed_origins": [
+    "chrome-extension://eigioodapjfjiilpjekonbnlkhdiobko/"
+  ]
+}

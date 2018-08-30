@@ -7,8 +7,10 @@ const projectDir = path.resolve(__dirname)
 const appDir = path.join(projectDir, 'app')
 const mainAppEntryPoint = path.join(appDir, 'appMain.lsc')
 const ISDEV = process.env.NODE_ENV !== 'production'
+const IS_BUILD_DEBUG = !!process.env.IS_BUILD_DEBUG
 
 console.log('ISDEV: ', ISDEV)
+console.log('IS_BUILD_DEBUG: ', IS_BUILD_DEBUG)
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV)
 
 const webpackOptions = {
@@ -52,7 +54,7 @@ const webpackOptions = {
     minimize: false
   },
   plugins: [
-    new webpack.DefinePlugin({ ISDEV }),
+    new webpack.DefinePlugin({ ISDEV, IS_BUILD_DEBUG }),
   ]
 }
 

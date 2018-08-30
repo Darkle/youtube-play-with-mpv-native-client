@@ -23,9 +23,9 @@ type NativeMessage = {
   cookies: string,
   mpvOptions: MpvOptions
 };
-mpvPath = path.join(process.cwd(), (ISDEV? 'debug': ''), 'mpv.exe')
-cookiesFilePath = path.join(process.cwd(), (ISDEV? 'debug': ''), 'cookies.txt')
 
+mpvPath = path.join(getMpvBinaryDir(), 'mpv.exe')
+cookiesFilePath = path.join(getMpvBinaryDir(), 'cookies.txt')
 input = new nativeMessage.Input()
 transform = new nativeMessage.Transform(messageHandler)
 output = new nativeMessage.Output()
@@ -103,6 +103,15 @@ createCookiesFile(cookies:string):string ->
 cleanYoutubeUrl(url:string):string ->
   parser = new YouTubeURLParser(url)
   `https://www.youtube.com/watch?v=${ parser.getId() }`
+
+/*****
+* If we're debugging the non-built version, our cwd will be the project
+* dir, but if we're debugging the built version, the cwd will just
+* be process.cwd()
+*/
+getMpvBinaryDir():boolean ->
+  if ISDEV && !IS_BUILD_DEBUG: return'debug'
+  process.cwd()
 
 process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout)
 process.on('unhandledRejection', logger.error)

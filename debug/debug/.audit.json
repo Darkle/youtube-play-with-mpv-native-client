@@ -6,14 +6,14 @@
     "auditLog": "debug/.audit.json",
     "files": [
         {
-            "date": 1535603292232,
+            "date": 1535603779079,
             "name": "debug\\yt-open-in-mpv-native-client-2018-08-30-14.log",
-            "hash": "efed0322de9bfad7f9d871270cffba87"
+            "hash": "66c1ee974575d1f205f0df922ba6938e"
         },
         {
-            "date": 1535605237000,
+            "date": 1535605350046,
             "name": "debug\\yt-open-in-mpv-native-client-2018-08-30-15.log",
-            "hash": "e02879b389a48180c59d4762b9c5a69d"
+            "hash": "ad54d1b77de3f2d4bf1e984ac8bee5c2"
         }
     ]
 }

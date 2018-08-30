@@ -285,9 +285,8 @@ var _logging = __webpack_require__(/*! ./logging.lsc */ "./app/logging.lsc");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
-const mpvPath = _path2.default.join(process.cwd(),  true ? 'debug' : undefined, 'mpv.exe');
-const cookiesFilePath = _path2.default.join(process.cwd(),  true ? 'debug' : undefined, 'cookies.txt');
-
+const mpvPath = _path2.default.join(getMpvBinaryDir(), 'mpv.exe');
+const cookiesFilePath = _path2.default.join(getMpvBinaryDir(), 'cookies.txt');
 const input = new _chromeNativeMessaging2.default.Input();
 const transform = new _chromeNativeMessaging2.default.Transform(messageHandler);
 const output = new _chromeNativeMessaging2.default.Output();
@@ -346,6 +345,14 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
 function cleanYoutubeUrl(url) {
   const parser = new _YoutubeParser.YouTubeURLParser(url);
   return `https://www.youtube.com/watch?v=${parser.getId()}`;
+} /*****
+  * If we're debugging the non-built version, our cwd will be the project
+  * dir, but if we're debugging the built version, the cwd will just
+  * be process.cwd()
+  */
+function getMpvBinaryDir() {
+  if (true) return 'debug';
+  return process.cwd();
 }process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout);
 process.on('unhandledRejection', _logging.logger.error);
 process.on('uncaughtException', _logging.logger.error);

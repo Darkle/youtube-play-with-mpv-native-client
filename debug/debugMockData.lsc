@@ -6,6 +6,8 @@ require('dotenv').config()
 */
 cookies = Buffer.from(process.env.DEBUGCOOKIES, 'base64').toString('utf8')
 
+// messageHandler(require('../debug/debugMockData.lsc').videoNoTimeStamp)
+
 videoNoTimeStamp = {
   cookies,
   mpvOptions: {
