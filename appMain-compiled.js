@@ -115,37 +115,25 @@ var _pFinally = __webpack_require__(6);
 
 var _pFinally2 = _interopRequireDefault(_pFinally);
 
-var _parsertest = __webpack_require__(7);
+var _YoutubeParser = __webpack_require__(7);
 
 var _logging = __webpack_require__(10);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// import { videoNoTimeStamp, videoWithTimeStamp, videoNeedToSignIn } from './debugMockData.lsc' //TODO: REMOVE THIS and switch to orig if my PR is accepted
-
 // import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
-const mpvPath = _path2.default.join(process.cwd(), 'mpv.exe'); //TODO:remove this and its file when done
-
+const mpvPath = _path2.default.join(process.cwd(), 'mpv.exe');
 const cookiesFilePath = _path2.default.join(process.cwd(), 'cookies.txt');
 
 const input = new _chromeNativeMessaging2.default.Input();
 const transform = new _chromeNativeMessaging2.default.Transform(messageHandler);
 const output = new _chromeNativeMessaging2.default.Output();
 
-//TODO: remove this
-// messageHandler(videoWithTimeStamp, null, () -> return)
-// messageHandler(videoNoTimeStamp, null, () -> return)
-// messageHandler(videoNeedToSignIn, null, () -> return)
 /*****
 * Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
 */
 function messageHandler({ url, cookies, mpvOptions }, push, done) {
-  _logging.logger.debug('messageHandler ');
-  _logging.logger.debug(url);
-  _logging.logger.debug(cookies);
-  _logging.logger.debug(mpvOptions);
-
-  const ytParser = new _parsertest.YouTubeURLParser(url);
+  const ytParser = new _YoutubeParser.YouTubeURLParser(url);
 
   if (!ytParser.isValid(url)) return;
 
@@ -196,7 +184,7 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   * mpv would seem to ignore any command line flags after the url, so gonna clean it.
   */
 function cleanYoutubeUrl(url) {
-  const parser = new _parsertest.YouTubeURLParser(url);
+  const parser = new _YoutubeParser.YouTubeURLParser(url);
   return `https://www.youtube.com/watch?v=${parser.getId()}`;
 }process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout);
 process.on('unhandledRejection', _logging.logger.error);
@@ -252,7 +240,10 @@ exports.YouTubeURLParser = undefined;
 
 var _qs = __webpack_require__(8);
 
-const validHost = /^(www.youtube.com|youtu.be)$/;
+const validHost = /^(www.youtube.com|youtu.be)$/; /*****
+                                                  * This is a forked versio of '@iktakahiro/youtube-url-parser'
+                                                  */
+
 const validPathname = /^.*\/([a-zA-Z0-9_-]{11})$/;
 const validId = /^([a-zA-Z0-9_-]{11})$/;
 const validStartAt = /^((\d{1,2})h)?((\d{1,2})m)?((\d{1,2})s)?$/;
@@ -424,7 +415,7 @@ const fileTransport = new _winston2.default.transports.DailyRotateFile({
   filename: 'yt-open-in-mpv-native-client-%DATE%.log',
   datePattern: 'YYYY-MM-DD-HH',
   maxSize: '20m',
-  maxFiles: '3d'
+  maxFiles: 5
 });
 
 const transports = [fileTransport];
@@ -432,7 +423,7 @@ const transports = [fileTransport];
 if (false) {}
 
 const logger = _winston2.default.createLogger({
-  level: 'debug',
+  level:  false ? undefined : 'error',
   format:  false ? undefined : _winston2.default.format.json(),
   transports
 });

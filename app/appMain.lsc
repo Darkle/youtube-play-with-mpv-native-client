@@ -6,11 +6,8 @@ import mpvAPI from 'node-mpv'
 import nativeMessage from 'chrome-native-messaging'
 import pFinally from 'p-finally'
 // import { YouTubeURLParser } from '@iktakahiro/youtube-url-parser'
-import {YouTubeURLParser } from './parsertest.lsc' //TODO:remove this and its file when done
-
+import {YouTubeURLParser } from './YoutubeParser.lsc'
 import { logger } from './logging.lsc'
-
-// import { videoNoTimeStamp, videoWithTimeStamp, videoNeedToSignIn } from './debugMockData.lsc' //TODO: REMOVE THIS and switch to orig if my PR is accepted
 
 type MpvOptions = {
   volume: number,
@@ -33,19 +30,10 @@ input = new nativeMessage.Input()
 transform = new nativeMessage.Transform(messageHandler)
 output = new nativeMessage.Output()
 
-//TODO: remove this
-// messageHandler(videoWithTimeStamp, null, () -> return)
-// messageHandler(videoNoTimeStamp, null, () -> return)
-// messageHandler(videoNeedToSignIn, null, () -> return)
 /*****
 * Based on https://github.com/winneon/watch-with-mpv/blob/master/native/native.js
 */
 messageHandler({url, cookies, mpvOptions}: NativeMessage, push, done):void ->
-  logger.debug('messageHandler ')
-  logger.debug(url)
-  logger.debug(cookies)
-  logger.debug(mpvOptions)
-
   ytParser = new YouTubeURLParser(url)
 
   if !ytParser.isValid(url): return

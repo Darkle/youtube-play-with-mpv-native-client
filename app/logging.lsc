@@ -5,7 +5,7 @@ fileTransport = new (winston.transports.DailyRotateFile)({
   filename: 'yt-open-in-mpv-native-client-%DATE%.log',
   datePattern: 'YYYY-MM-DD-HH',
   maxSize: '20m',
-  maxFiles: '3d'
+  maxFiles: 5
 })
 
 transports = [
@@ -15,7 +15,7 @@ transports = [
 if ISDEV: transports.push(new winston.transports.Console())
 
 logger = winston.createLogger({
-  level: 'debug',
+  level: if ISDEV: 'debug' else: 'error',
   format: if ISDEV: winston.format.prettyPrint() else: winston.format.json()
   transports
 })
