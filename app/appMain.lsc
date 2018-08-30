@@ -109,7 +109,7 @@ cleanYoutubeUrl(url:string):string ->
 * be process.cwd()
 */
 getMpvBinaryDir():boolean ->
-  if ISDEV && !IS_BUILD_DEBUG: return'debug'
+  if ISDEV && !IS_BUILD_DEBUG: return 'debug'
   process.cwd()
 
 process.stdin.pipe(input).pipe(transform).pipe(output).pipe(process.stdout)
