@@ -21,8 +21,9 @@ DisableProgramGroupPage=yes
 LicenseFile=..\LICENSE
 OutputDir=..\build
 OutputBaseFilename=youtube-open-in-mpv-installer-x64
-Compression=none
-;SolidCompression=yes
+Compression=lzma2/max
+LZMAUseSeparateProcess=yes
+SolidCompression=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
