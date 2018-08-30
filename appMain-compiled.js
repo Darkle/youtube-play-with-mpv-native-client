@@ -136,6 +136,9 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   if (!ytParser.isValid(url)) return;
   createCookiesFile(cookies);
   const mpvPlayer = createNewMpvInstance(mpvOptions);
+  mpvPlayer.on('crashed', function () {
+    return _logging.logger.error('mpv crashed');
+  });
 
   (0, _pFinally2.default)(mpvPlayer.start().then(function () {
     return mpvPlayer.volume(mpvOptions.volume);
@@ -150,14 +153,6 @@ function messageHandler({ url, cookies, mpvOptions }, push, done) {
   }).then(function () {
     if (mpvOptions.startMPVpaused) return mpvPlayer.pause();
   }), done).catch(_logging.logger.error);
-
-  mpvPlayer.on('crashed', function () {
-    _logging.logger.error('mpv crashed');
-    done();
-    return setTimeout(function () {
-      return process.exit(1);
-    }, 3000);
-  });
 }function createNewMpvInstance(mpvOptions) {
   return new _nodeMpv2.default({
     binary: mpvPath,
