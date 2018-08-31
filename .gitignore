@@ -6,3 +6,5 @@ cookies.txt
 debug/input.conf
 debug/net.ccoding.ytplaywithmpv.json
 .audit.json
+appMain-compiled.js.map
+appMain-compiled.js
