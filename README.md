@@ -2,6 +2,9 @@
 
 This is the native client (i.e. binary) for the [Youtube Play With MPV Chrome Extension](https://github.com/Darkle/youtube-play-with-mpv-chrome-extension#readme "Youtube Play With MPV Chrome Extension repo page"). You need to install this in order for the Chrome extension to be able to open a Youtube video in [mpv](https://mpv.io/ "mpv homepage").
 
+### Important
+If you install the Native Client after you install the Chrome extension, make sure to disable, then re-enable the Chrome extension.
+
 ### Prerequisites
 
 Windows 64bit
